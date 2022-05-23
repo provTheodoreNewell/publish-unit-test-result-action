@@ -1,3 +1,4 @@
+import itertools
 import json
 import logging
 import os
@@ -12,14 +13,14 @@ import github
 from urllib3.util.retry import Retry
 
 import publish.github_action
-from publish import hide_comments_modes, none_list, available_annotations, default_annotations, \
+from publish import hide_comments_modes, available_annotations, default_annotations, \
     pull_request_build_modes, fail_on_modes, fail_on_mode_errors, fail_on_mode_failures, \
     comment_mode_off, comment_mode_update, comment_modes
 from publish.github_action import GithubAction
-from publish.junit import parse_junit_xml_files
+from publish.junit import parse_junit_xml_files, process_junit_xml_elems
 from publish.publisher import Publisher, Settings
 from publish.retry import GitHubRetry
-from publish.unittestresults import get_test_results, get_stats, ParsedUnitTestResults
+from publish.unittestresults import get_test_results, get_stats, ParsedUnitTestResults, ParsedUnitTestResultsWithCommit
 
 logger = logging.getLogger('publish-unit-test-results')
 
@@ -56,6 +57,39 @@ def get_files(multiline_files_globs: str) -> List[str]:
     return list(included - excluded)
 
 
+def expand_glob(pattern: Optional[str], gha: GithubAction) -> List[str]:
+    if not pattern:
+        return []
+
+    files = get_files(pattern)
+
+    if len(files) == 0:
+        gha.warning(f'Could not find any files for {pattern}')
+    else:
+        logger.info(f'reading {pattern}')
+        logger.debug(f'reading {list(files)}')
+
+    return files
+
+
+def parse_files(settings: Settings, gha: GithubAction) -> ParsedUnitTestResultsWithCommit:
+    # expand file globs
+    junit_files = expand_glob(settings.junit_files_glob, gha)
+    trx_files = expand_glob(settings.trx_files_glob, gha)
+
+    elems = []
+
+    # parse files
+    if junit_files:
+        elems.extend(parse_junit_xml_files(junit_files, settings.ignore_runs))
+    if trx_files:
+        from publish.trx import parse_trx_files
+        elems.extend(parse_trx_files(trx_files))
+
+    # get the unit test results
+    return process_junit_xml_elems(elems, settings.time_factor).with_commit(settings.commit)
+
+
 def main(settings: Settings, gha: GithubAction) -> None:
     # we cannot create a check run or pull request comment when running on pull_request event from a fork
     # when event_file is given we assume proper setup as in README.md#support-fork-repositories-and-dependabot-branches
@@ -69,16 +103,8 @@ def main(settings: Settings, gha: GithubAction) -> None:
                     f'https://github.com/EnricoMi/publish-unit-test-result-action/blob/v1.20/README.md#support-fork-repositories-and-dependabot-branches')
         return
 
-    # resolve the files_glob to files
-    files = get_files(settings.junit_files_glob)
-    if len(files) == 0:
-        gha.warning(f'Could not find any files for {settings.junit_files_glob}')
-    else:
-        logger.info(f'reading {settings.junit_files_glob}')
-        logger.debug(f'reading {list(files)}')
-
     # get the unit test results
-    parsed = parse_junit_xml_files(files, settings.time_factor, settings.ignore_runs).with_commit(settings.commit)
+    parsed = parse_files(settings, gha)
     [gha.error(message=f'Error processing result file: {error.message}', file=error.file, line=error.line, column=error.column)
      for error in parsed.errors]
 
