@@ -1,6 +1,5 @@
 import contextlib
 import locale
-import os
 import pathlib
 import unittest
 
@@ -12,7 +11,7 @@ from publish.unittestresults import get_stats, UnitTestCase, ParseError
 from publish.unittestresults import get_test_results
 from test import d, n
 
-test_files_path = pathlib.Path(__file__).parent / 'files'
+test_files_path = pathlib.Path(__file__).parent / 'files' / 'junit'
 
 @contextlib.contextmanager
 def temp_locale(encoding: str) -> Any:

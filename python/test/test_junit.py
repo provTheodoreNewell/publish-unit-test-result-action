@@ -8,7 +8,7 @@ from junitparser import JUnitXml, Element, version
 from publish.junit import parse_junit_xml_files, process_junit_xml_elems, get_results, get_result, get_content, get_message, Disabled
 from publish.unittestresults import ParsedUnitTestResults, UnitTestCase, ParseError
 
-test_files_path = pathlib.Path(__file__).parent / 'files'
+test_files_path = pathlib.Path(__file__).parent / 'files' / 'junit'
 
 
 class TestElement(Element):
