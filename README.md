@@ -22,7 +22,8 @@ You can add this action to your GitHub workflow for ![Ubuntu Linux](https://badg
   uses: EnricoMi/publish-unit-test-result-action@v1
   if: always()
   with:
-    junit_files: "test-results/**/*.xml"
+    junit_files: "test-results/junit/**/*.xml"
+    xunit_files: "test-results/xunit/**/*.xml"
     trx_files: "test-results/**/*.trx"
 ```
 
@@ -34,7 +35,8 @@ and ![Windows](https://badgen.net/badge/icon/Windows?icon=windows&label) (e.g. `
   uses: EnricoMi/publish-unit-test-result-action/composite@v1
   if: always()
   with:
-    junit_files: "test-results/**/*.xml"
+    junit_files: "test-results/junit/**/*.xml"
+    xunit_files: "test-results/xunit/**/*.xml"
     trx_files: "test-results/**/*.trx"
 ```
 
@@ -153,11 +155,11 @@ With `comment_mode: off`, the `pull-requests: write` permission is not needed.
 
 ## Configuration
 
-Files can be selected via the `junit_files` and `trx_files` options.
+Files can be selected via the `junit_files`, `xunit_files`, and `trx_files` options.
 They support [glob wildcards](https://docs.python.org/3/library/glob.html#glob.glob) like `*`, `**`, `?` and `[]`.
 The `**` wildcard matches all files and directories recursively: `./`, `./*/`, `./*/*/`, etc.
 
-At least one of `junit_files` and `trx_files` options have to be set.
+At least one of `junit_files`, `xunit_files`, and `trx_files` options have to be set.
 
 You can provide multiple file patterns, one pattern per line. Patterns starting with `!` exclude the matching files.
 There have to be at least one pattern starting without a `!`:
@@ -173,7 +175,7 @@ See the complete list of options below.
 
 |Option|Default Value|Description|
 |:-----|:-----:|:----------|
-|`junit_files`<br/>`trx_files`| |At least one of these `*_files` must be set. File patterns of JUnit XML and TRX test result files, respectively. Supports `*`, `**`, `?`, and `[]`. Use multiline string for multiple patterns. Patterns starting with `!` exclude the matching files. There have to be at least one pattern starting without a `!`.|
+|`junit_files`<br/>`xunit_files`<br/>`trx_files`| |At least one of these `*_files` must be set. File patterns of JUnit XML, XUnit XML, and TRX test result files, respectively. Supports `*`, `**`, `?`, and `[]`. Use multiline string for multiple patterns. Patterns starting with `!` exclude the matching files. There have to be at least one pattern starting without a `!`.|
 |`time_unit`|`seconds`|Time values in the test result files have this unit. Supports `seconds` and `milliseconds`.|
 |`check_name`|`"Unit Test Results"`|An alternative name for the check result.|
 |`comment_title`|same as `check_name`|An alternative name for the pull request comment.|

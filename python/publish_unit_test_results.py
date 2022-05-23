@@ -75,6 +75,7 @@ def expand_glob(pattern: Optional[str], gha: GithubAction) -> List[str]:
 def parse_files(settings: Settings, gha: GithubAction) -> ParsedUnitTestResultsWithCommit:
     # expand file globs
     junit_files = expand_glob(settings.junit_files_glob, gha)
+    xunit_files = expand_glob(settings.xunit_files_glob, gha)
     trx_files = expand_glob(settings.trx_files_glob, gha)
 
     elems = []
@@ -82,6 +83,9 @@ def parse_files(settings: Settings, gha: GithubAction) -> ParsedUnitTestResultsW
     # parse files
     if junit_files:
         elems.extend(parse_junit_xml_files(junit_files, settings.ignore_runs))
+    if xunit_files:
+        from publish.xunit import parse_xunit_files
+        elems.extend(parse_xunit_files(xunit_files))
     if trx_files:
         from publish.trx import parse_trx_files
         elems.extend(parse_trx_files(trx_files))
@@ -275,7 +279,7 @@ def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
     # replace with error when deprecated FILES is removed
     default_junit_files_glob = None
     if not any([get_var(f'{flavour}_FILES', options)
-                for flavour in ['JUNIT', 'TRX']]):
+                for flavour in ['JUNIT', 'XUNIT', 'TRX']]):
         default_junit_files_glob = '*.xml'
         gha.warning(f'At least one of the *_FILES options has to be set! '
                     f'Falling back to deprecated default "{default_junit_files_glob}"')
@@ -318,6 +322,7 @@ def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
         fail_on_errors=fail_on_errors,
         fail_on_failures=fail_on_failures,
         junit_files_glob=get_var('JUNIT_FILES', options) or get_var('FILES', options) or default_junit_files_glob,
+        xunit_files_glob=get_var('XUNIT_FILES', options),
         trx_files_glob=get_var('TRX_FILES', options),
         time_factor=time_factor,
         check_name=check_name,

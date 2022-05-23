@@ -119,7 +119,7 @@ class DropTestCaseBuilder(etree.TreeBuilder):
 
 
 def parse_junit_xml_files(files: Iterable[str], drop_testcases: bool = False) -> Iterable[Tuple[str, Union[JUnitXml, BaseException]]]:
-    """Parses junit xml files and returns aggregated statistics as a ParsedUnitTestResults."""
+    """Parses junit xml files."""
     def parse(path: str) -> Union[JUnitXml, BaseException]:
         if not os.path.exists(path):
             return FileNotFoundError(f'File does not exist.')

@@ -6,7 +6,7 @@ from lxml import etree
 from publish.junit import process_junit_xml_elems, ParsedUnitTestResults, UnitTestCase
 from publish.trx import parse_trx_files, transform_trx_to_junit
 
-test_files_path = pathlib.Path(__file__).parent / 'files'
+test_files_path = pathlib.Path(__file__).parent / 'files' / 'mstest'
 
 
 class TestTrx(unittest.TestCase):
