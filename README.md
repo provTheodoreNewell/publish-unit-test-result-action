@@ -13,7 +13,7 @@
 [![Test Results](https://gist.githubusercontent.com/EnricoMi/612cb538c14731f1a8fefe504f519395/raw/badge.svg)](https://gist.githubusercontent.com/EnricoMi/612cb538c14731f1a8fefe504f519395/raw/badge.svg)
 
 This [GitHub Action](https://github.com/actions) analyses test result files and
-publishes the results on GitHub. It supports the JUnit XML file format and runs on Linux, macOS and Windows.
+publishes the results on GitHub. It supports the JUnit XML and TRX file formats, and runs on Linux, macOS and Windows.
 
 You can add this action to your GitHub workflow for ![Ubuntu Linux](https://badgen.net/badge/icon/Ubuntu?icon=terminal&label) (e.g. `runs-on: ubuntu-latest`) runners:
 
@@ -173,9 +173,8 @@ See the complete list of options below.
 
 |Option|Default Value|Description|
 |:-----|:-----:|:----------|
-|`junit_files`|One of `*_files` must be set|File patterns of JUnit XML test result files. Supports `*`, `**`, `?`, and `[]`. Use multiline string for multiple patterns. Patterns starting with `!` exclude the matching files. There have to be at least one pattern starting without a `!`.|
-|`trx_files`|One of `*_files` must be set|File patterns of TRX test result files. Supports `*`, `**`, `?`, and `[]`. Use multiline string for multiple patterns. Patterns starting with `!` exclude the matching files. There have to be at least one pattern starting without a `!`.|
-|`time_unit`|`seconds`|Time values in the XML files have this unit. Supports `seconds` and `milliseconds`.|
+|`junit_files`<br/>`trx_files`| |At least one of these `*_files` must be set. File patterns of JUnit XML and TRX test result files, respectively. Supports `*`, `**`, `?`, and `[]`. Use multiline string for multiple patterns. Patterns starting with `!` exclude the matching files. There have to be at least one pattern starting without a `!`.|
+|`time_unit`|`seconds`|Time values in the test result files have this unit. Supports `seconds` and `milliseconds`.|
 |`check_name`|`"Unit Test Results"`|An alternative name for the check result.|
 |`comment_title`|same as `check_name`|An alternative name for the pull request comment.|
 |`comment_mode`|`update last`|The action posts comments to a pull request that is associated with the commit. Set to `create new` to create a new comment on each commit, `update last` to create only one comment and update later on, `off` to not create pull request comments.|
@@ -194,7 +193,7 @@ See the complete list of options below.
 |`test_changes_limit`|`10`|Limits the number of removed or skipped tests listed on pull request comments. This can be disabled with a value of `0`.|
 |`report_individual_runs`|`false`|Individual runs of the same test may see different failures. Reports all individual failures when set `true`, and the first failure only otherwise.|
 |`deduplicate_classes_by_file_name`|`false`|De-duplicates classes with same name by their file name when set `true`, combines test results for those classes otherwise.|
-|`ignore_runs`|`false`|Does not process test run information by ignoring `<testcase>` elements in the XML files, which is useful for very large XML files. This disables any check run annotations.|
+|`ignore_runs`|`false`|Does not collect test run information from the test result files, which is useful for very large files. This disables any check run annotations.|
 |`compare_to_earlier_commit`|`true`|Test results are compared to results of earlier commits to show changes:<br/>`false` - disable comparison, `true` - compare across commits.'|
 |`check_run_annotations`|`all tests, skipped tests`|Adds additional information to the check run (comma-separated list):<br>`all tests` - list all found tests,<br>`skipped tests` - list all skipped tests,<br>`none` - no extra annotations at all|
 |`check_run_annotations_branch`|default branch|Adds check run annotations only on given branches. If not given, this defaults to the default branch of your repository, e.g. `main` or `master`. Comma separated list of branch names allowed, asterisk `"*"` matches all branches. Example: `main, master, branch_one`|
@@ -564,7 +563,7 @@ If this conflicts with actions that later run Python in the same workflow (which
 it is recommended to run this action as the last step in your workflow, or to run it in an isolated workflow.
 Running it in an isolated workflow is similar to the workflows shown in [Use with matrix strategy](#use-with-matrix-strategy).
 
-To run the composite action in an isolated workflow, your CI workflow should upload all test result XML files:
+To run the composite action in an isolated workflow, your CI workflow should upload all test result files:
 
 ```yaml
 build-and-test:
