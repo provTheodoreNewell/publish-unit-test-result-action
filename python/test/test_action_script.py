@@ -813,7 +813,7 @@ class Test(unittest.TestCase):
         self.assertEqual(30, actual.suite_failures)
         self.assertEqual(7, actual.suite_errors)
         self.assertEqual(2361, actual.suite_time)
-        self.assertEqual(444, len(actual.cases))
+        self.assertEqual(448, len(actual.cases))
         self.assertEqual('commit', actual.commit)
 
     def test_parse_files_no_matches(self):
