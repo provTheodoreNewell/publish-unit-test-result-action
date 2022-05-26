@@ -232,7 +232,7 @@ def is_float(text: str) -> bool:
 
 
 def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
-    ignore_event_file = get_var('IGNORE_EVENT_FILE', options)
+    ignore_event_file = get_bool_var('IGNORE_EVENT_FILE', options, default=False, gha=gha)
     if !ignore_event_file:
         event_file = get_var('EVENT_FILE', options)
         event = event_file or get_var('GITHUB_EVENT_PATH', options)
