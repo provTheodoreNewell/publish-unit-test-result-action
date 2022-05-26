@@ -65,6 +65,10 @@ inputs:
     description: 'Pull request events build a merge of the branch and the target branch, not just the commit that has been pushed. When your workflow deviates from this behaviour and builds the actual commit, then set this option to "commit". Defaults to "merge".'
     default: 'merge'
     required: false
+  ignore_event_file:
+    description: 'When `true`, ignores event file checks that can be useful for triggers from forks or Dependabot.'
+    default: 'false'
+    required: false
   event_file:
     description: 'An alternative event file to use. Useful to replace a "workflow_run" event file with the actual source event file.'
     required: false

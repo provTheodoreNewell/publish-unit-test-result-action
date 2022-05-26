@@ -59,7 +59,8 @@ def get_files(multiline_files_globs: str) -> List[str]:
 def main(settings: Settings, gha: GithubAction) -> None:
     # we cannot create a check run or pull request comment when running on pull_request event from a fork
     # when event_file is given we assume proper setup as in README.md#support-fork-repositories-and-dependabot-branches
-    if settings.event_file is None and \
+    if !settings.ignore_event_file and \
+            settings.event_file is None and \
             settings.event_name == 'pull_request' and \
             settings.event.get('pull_request', {}).get('head', {}).get('repo', {}).get('full_name') != settings.repo:
         # bump the version if you change the target of this link (if it did not exist already) or change the section
@@ -231,13 +232,15 @@ def is_float(text: str) -> bool:
 
 
 def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
-    event_file = get_var('EVENT_FILE', options)
-    event = event_file or get_var('GITHUB_EVENT_PATH', options)
-    event_name = get_var('EVENT_NAME', options) or get_var('GITHUB_EVENT_NAME', options)
-    check_var(event, 'GITHUB_EVENT_PATH', 'GitHub event file path')
-    check_var(event_name, 'GITHUB_EVENT_NAME', 'GitHub event name')
-    with open(event, 'rt', encoding='utf-8') as f:
-        event = json.load(f)
+    ignore_event_file = get_var('IGNORE_EVENT_FILE', options)
+    if !ignore_event_file:
+        event_file = get_var('EVENT_FILE', options)
+        event = event_file or get_var('GITHUB_EVENT_PATH', options)
+        event_name = get_var('EVENT_NAME', options) or get_var('GITHUB_EVENT_NAME', options)
+        check_var(event, 'GITHUB_EVENT_PATH', 'GitHub event file path')
+        check_var(event_name, 'GITHUB_EVENT_NAME', 'GitHub event name')
+        with open(event, 'rt', encoding='utf-8') as f:
+            event = json.load(f)
     api_url = options.get('GITHUB_API_URL') or github.MainClass.DEFAULT_BASE_URL
     graphql_url = options.get('GITHUB_GRAPHQL_URL') or f'{github.MainClass.DEFAULT_BASE_URL}/graphql'
     test_changes_limit = get_var('TEST_CHANGES_LIMIT', options) or '10'
@@ -276,6 +279,7 @@ def get_settings(options: dict, gha: Optional[GithubAction] = None) -> Settings:
         graphql_url=graphql_url,
         api_retries=int(retries),
         event=event,
+        ignore_event_file=ignore_event_file,
         event_file=event_file,
         event_name=event_name,
         repo=get_var('GITHUB_REPOSITORY', options),
